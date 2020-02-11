@@ -1,5 +1,5 @@
-# MultichainClient
-> A simple multichain client to operate corda network
+# CordaClient
+> A simple corda client to operate corda network
 
 ### Introduction
 > This Simple Project is used to operate the corda network 
