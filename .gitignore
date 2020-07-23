@@ -32,11 +32,6 @@ hs_err_pid*
 .idea/misc.xml
 .idea/vcs.xml
 ideaIU-2019.2.win-workspace.iml
-src/main/java/com/ml/corda/client/controller/
-src/main/java/com/ml/corda/client/example/
-src/main/java/com/ml/corda/client/model/
-src/main/java/com/ml/corda/client/util/
-src/test/
 target/classes/application-dev.properties
 target/classes/application-prod.properties
 target/classes/application.properties
