@@ -1,0 +1,58 @@
+apiVersion: apps/v1  #Deployment and StatefulSet is defined in apps/v1 not in corev1
+kind: Deployment
+metadata:
+  name: cordawebv2   #name of the deployment
+  namespace: ${NodeNamespace}
+  labels:
+    app: cordawebv2
+spec:
+  replicas: 1  #for testing purpose i set to 1
+  selector:
+    matchLabels:
+      app: cordawebv2
+  template:
+    metadata:
+      labels:
+        app: cordawebv2
+    spec:
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler       
+      terminationGracePeriodSeconds: 10    #当删除Pod时，等待时间
+      containers:
+      - name: cordawebv2
+        image: 127.0.0.1:5000/menglong567:corda-webserver-4.4-v2
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: port
+            containerPort: 8080
+        volumeMounts:
+          - mountPath: /logs  #directory in docker container
+            name: log
+        resources:
+          requests:
+            memory: "${memoryRequest}Mi"
+            cpu: "${cpuRequest}m"
+          limits:
+            memory: "${memoryLimit}Mi"
+            cpu: "${cpuLimit}m"
+      volumes:
+      - name: log
+        hostPath:
+          path: /home/corda-networks-dynamic-compatibility-zone-k8s/${NodeNamespace}/corda-webserver-v2-dynamic-zone-4.4-k8s/logs  # directory location on host
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cordawebv2-webserver-nodeport
+  namespace: ${NodeNamespace}
+spec:
+  type: NodePort
+  selector:
+    app: cordawebv2
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: ${WebserverNodeport}

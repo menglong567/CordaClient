@@ -1,0 +1,63 @@
+apiVersion: apps/v1  #Deployment and StatefulSet is defined in apps/v1 not in corev1
+kind: Deployment
+metadata:
+  name: ${NodeName}-web   #name of the deployment
+  namespace: ${NodeNamespace}
+  labels:
+    app: ${NodeName}-web
+spec:
+  replicas: 1  #for testing purpose i set to 1
+  selector:
+    matchLabels:
+      app: ${NodeName}-web
+  template:
+    metadata:
+      labels:
+        app: ${NodeName}-web
+    spec:
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler       
+      terminationGracePeriodSeconds: 10    #当删除Pod时，等待时间
+      containers:
+      - name: ${NodeName}-web
+        image: 127.0.0.1:5000/menglong567:corda-webserver-4.4
+        imagePullPolicy: IfNotPresent
+        command: ["java", "-Djava.security.egd=file:/dev/./urandom","-Xmx256m","-jar","/app.jar","--server.port=50005","--config.rpc.host=${NodeName}-0.${NodeName}","--config.rpc.port=${PartyRPCPort}","--config.rpc.username=user1","--config.rpc.password=test"]
+        ports:
+          - name: port
+            containerPort: 50005
+        volumeMounts:
+          - mountPath: /logs  #directory in docker container
+            name: log
+        resources:
+          requests:
+            memory: "${memoryRequest}Mi"
+            cpu: "${cpuRequest}m"
+          limits:
+            memory: "${memoryLimit}Mi"
+            cpu: "${cpuLimit}m"
+      volumes:
+      - name: log
+        hostPath:
+          path: /home/corda-networks-dynamic-compatibility-zone-k8s/${NodeNamespace}/corda-${NodeName}-webserver-dynamic-zone-4.4-k8s/logs  # directory location on host
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${NodeName}-webserver-nodeport
+  namespace: ${NodeNamespace}
+spec:
+  type: NodePort
+  selector:
+    app: ${NodeName}-web
+  ports:
+    - port: 50005
+      targetPort: 50005
+      nodePort: ${WebserverNodeport}
+#下面这种方式针对在同一个namespace中, {pod-name}.{headless-service-name}
+#http://${NodeName}-web-0.${NodeName}-web:port
+#下面这种方式针对跨越不同namespace，使用的是stateheadless+headless service的DNS地址, {pod-name}.{headless-service-name}.{namespace}.svc.cluster.local
+#http://${NodeName}-web-0.${NodeName}-web.${NodeNamespace}.svc.cluster.local:port
