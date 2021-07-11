@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 10    #当删除Pod时，等待时间
       containers:
       - name: cordawebv2
-        image: 127.0.0.1:5000/menglong567:corda-webserver-4.4-v2
+        image: 127.0.0.1:5000/menglong567:cordaclient-4.4
         imagePullPolicy: IfNotPresent
         ports:
           - name: port
@@ -40,7 +40,7 @@ spec:
       volumes:
       - name: log
         hostPath:
-          path: /home/corda-networks-dynamic-compatibility-zone-k8s/${NodeNamespace}/corda-webserver-v2-dynamic-zone-4.4-k8s/logs  # directory location on host
+          path: /home/corda-networks-dynamic-compatibility-zone-k8s/${NodeNamespace}/corda-client-dynamic-zone-4.4-k8s/logs  # directory location on host
           type: DirectoryOrCreate
 ---
 apiVersion: v1
